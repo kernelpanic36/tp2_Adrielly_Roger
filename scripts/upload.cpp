@@ -4,19 +4,11 @@
 #include <string>
 #include <algorithm>
 #include <cstring>
+#include "./ConstantParameters/const.h"
+#include "./Hash/hash.h"
+#include "./Register/dataRegister.h"
 
 using namespace std;
-
-struct DataRegister{
-    //Estrutura do registro
-    int ID;
-    char Titulo[300];
-    int Ano;
-    char Autores[150];
-    int Citacoes;
-    char Atualizacao[25];
-    char Snippet[1024];
-};
 
 void clearFile(string fileName){ //Função para limpar um arquivo
     fstream fout; //Stream de dados para o arquivo
@@ -24,11 +16,10 @@ void clearFile(string fileName){ //Função para limpar um arquivo
     fout.close();
 }
 
-unsigned int hashFunction(unsigned int key, unsigned int capacity) { //Função hash
-    key = ((key >> 16) ^ key) * 0x45d9f3b;
-    key = ((key >> 16) ^ key) * 0x45d9f3b;
-    key = (key >> 16) ^ key;
-    return key % capacity;
+void hashTableToFile(){
+    for(int cont = 0; cont < BUCKETS_QTD; cont++){
+        
+    }
 }
 
 void saveRegister(DataRegister data){ //Função para salvar os registros em memória secundaria
@@ -53,6 +44,9 @@ void processCSV(char *file){ //Função para ler os registros do csv
         string tempString; //String para receber temporariamente o conteudo de uma linha e modificá-la
         string line = "";  //String para armazenar a linha atual
         clearFile("dataFile.dat"); //Limpar arquivo de dados caso já exista
+        //hashTableToFile(); //Gerar os buckets no arquivo
+
+
         while(getline(inputFile, line)){
             //A estratégia usada foi pegar uma linha, armazenar em uma stringstream, manipular a linha e colocar no campo correspondente do registro
             stringstream inputString(line);
@@ -130,26 +124,5 @@ int main(int argc, char *argv[]){
     else{
         char* file = argv[1];
         processCSV(file);
-    }
-
-    //teste de leitura
-    fstream temp; //Stream de dados para o arquivo
-    temp.open("dataFile.dat", ios::in | ios::binary); //Abrindo arquivo para leitura
-
-    if(temp){
-        DataRegister tempData;
-        while(temp.read(reinterpret_cast<char*>(&tempData), sizeof(DataRegister))){
-            cout << tempData.ID << endl;
-            cout << tempData.Titulo << endl;
-            cout << tempData.Ano<< endl;
-            cout << tempData.Autores<< endl;
-            cout << tempData.Citacoes<< endl;
-            cout << tempData.Atualizacao<< endl;
-            cout << tempData.Snippet<< endl;
-            cout << endl;
-        }
-    }
-    else{
-        cout << "Não foi possivel abrir o arquivo binário para escrita..." << endl;
     }
 }

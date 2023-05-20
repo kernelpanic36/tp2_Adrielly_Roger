@@ -1,0 +1,1 @@
+unsigned int hashFunction(unsigned int key, unsigned int capacity);
