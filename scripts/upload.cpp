@@ -21,7 +21,7 @@ struct DataRegister{
 void saveRegister(DataRegister data){ //Função para salvar os registros em memória secundaria
     fstream fout; //Stream de dados para o arquivo
 
-    fout.open("dataFile.dat", ios::out | ios::binary); //Abrindo arquivo para escrita
+    fout.open("dataFile.dat", ios::out | ios::binary | ios::app); //Abrindo arquivo para escrita
 
     if(fout){
         fout.write(reinterpret_cast<char*>(&data), sizeof(DataRegister)); //Escrevendo registro no arquivo
@@ -99,6 +99,8 @@ void processCSV(char* file){ //Função para ler os registros do csv
             cout << "Snippet: " << regTemp.Snippet << endl;
             cout << endl;
             */
+
+           saveRegister(regTemp);
         }
 
         inputFile.close(); //Fechar o arquivo
