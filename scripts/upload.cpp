@@ -3,25 +3,32 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <cstring>
 
 using namespace std;
 
 struct DataRegister{
     //Estrutura do registro
-   
     int ID;
-    string Titulo;
+    char Titulo[300];
     int Ano;
-    string Autores;
+    char Autores[150];
     int Citacoes;
-    string Atualizacao;
-    string Snippet;
+    char Atualizacao[25];
+    char Snippet[1024];
 };
 
-void clearFile(string fileName){
+void clearFile(string fileName){ //Função para limpar um arquivo
     fstream fout; //Stream de dados para o arquivo
     fout.open(fileName.c_str(), ios::out | ios::trunc); //Abrindo arquivo para escrita e limpando seu conteúdo
     fout.close();
+}
+
+unsigned int hashFunction(unsigned int key, unsigned int capacity) { //Função hash
+    key = ((key >> 16) ^ key) * 0x45d9f3b;
+    key = ((key >> 16) ^ key) * 0x45d9f3b;
+    key = (key >> 16) ^ key;
+    return key % capacity;
 }
 
 void saveRegister(DataRegister data){ //Função para salvar os registros em memória secundaria
@@ -38,7 +45,7 @@ void saveRegister(DataRegister data){ //Função para salvar os registros em mem
     }
 }
 
-void processCSV(char* file){ //Função para ler os registros do csv
+void processCSV(char *file){ //Função para ler os registros do csv
     ifstream inputFile; //Stream de dados para o arquivo
     inputFile.open(file); //Abrindo para leitura
     if(inputFile){ //Verificando se arquivo está aberto
@@ -46,7 +53,6 @@ void processCSV(char* file){ //Função para ler os registros do csv
         string tempString; //String para receber temporariamente o conteudo de uma linha e modificá-la
         string line = "";  //String para armazenar a linha atual
         clearFile("dataFile.dat"); //Limpar arquivo de dados caso já exista
-
         while(getline(inputFile, line)){
             //A estratégia usada foi pegar uma linha, armazenar em uma stringstream, manipular a linha e colocar no campo correspondente do registro
             stringstream inputString(line);
@@ -61,7 +67,7 @@ void processCSV(char* file){ //Função para ler os registros do csv
             tempString = "";
             getline(inputString, tempString, ';');
             tempString.erase (remove(tempString.begin(), tempString.end(), '"'), tempString.end());
-            regTemp.Titulo = tempString;
+            strncpy(regTemp.Titulo, tempString.c_str(), 300);
 
             //Ano
             tempString = "";
@@ -73,7 +79,7 @@ void processCSV(char* file){ //Função para ler os registros do csv
             tempString = "";
             getline(inputString, tempString, ';');
             tempString.erase (remove(tempString.begin(), tempString.end(), '"'), tempString.end());
-            regTemp.Autores = tempString;
+            strncpy(regTemp.Autores, tempString.c_str(), 150);
 
             //Citacoes
             tempString = "";
@@ -85,13 +91,13 @@ void processCSV(char* file){ //Função para ler os registros do csv
             tempString = "";
             getline(inputString, tempString, ';');
             tempString.erase (remove(tempString.begin(), tempString.end(), '"'), tempString.end());
-            regTemp.Atualizacao = tempString;
+            strncpy(regTemp.Atualizacao, tempString.c_str(), 25);
 
             //Snippet
             tempString = "";
             getline(inputString, tempString, ';');
             tempString.erase (remove(tempString.begin(), tempString.end(), '"'), tempString.end());
-            regTemp.Snippet = tempString;
+            strncpy(regTemp.Snippet, tempString.c_str(), 1024);
 
             line = "";
 
@@ -124,5 +130,26 @@ int main(int argc, char *argv[]){
     else{
         char* file = argv[1];
         processCSV(file);
+    }
+
+    //teste de leitura
+    fstream temp; //Stream de dados para o arquivo
+    temp.open("dataFile.dat", ios::in | ios::binary); //Abrindo arquivo para leitura
+
+    if(temp){
+        DataRegister tempData;
+        while(temp.read(reinterpret_cast<char*>(&tempData), sizeof(DataRegister))){
+            cout << tempData.ID << endl;
+            cout << tempData.Titulo << endl;
+            cout << tempData.Ano<< endl;
+            cout << tempData.Autores<< endl;
+            cout << tempData.Citacoes<< endl;
+            cout << tempData.Atualizacao<< endl;
+            cout << tempData.Snippet<< endl;
+            cout << endl;
+        }
+    }
+    else{
+        cout << "Não foi possivel abrir o arquivo binário para escrita..." << endl;
     }
 }
