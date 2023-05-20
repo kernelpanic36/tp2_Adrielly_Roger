@@ -18,6 +18,12 @@ struct DataRegister{
     string Snippet;
 };
 
+void clearFile(string fileName){
+    fstream fout; //Stream de dados para o arquivo
+    fout.open(fileName.c_str(), ios::out | ios::trunc); //Abrindo arquivo para escrita e limpando seu conteúdo
+    fout.close();
+}
+
 void saveRegister(DataRegister data){ //Função para salvar os registros em memória secundaria
     fstream fout; //Stream de dados para o arquivo
 
@@ -39,6 +45,7 @@ void processCSV(char* file){ //Função para ler os registros do csv
         DataRegister regTemp; //Variavel para armazenar temporariamente um registro.
         string tempString; //String para receber temporariamente o conteudo de uma linha e modificá-la
         string line = "";  //String para armazenar a linha atual
+        clearFile("dataFile.dat"); //Limpar arquivo de dados caso já exista
 
         while(getline(inputFile, line)){
             //A estratégia usada foi pegar uma linha, armazenar em uma stringstream, manipular a linha e colocar no campo correspondente do registro
