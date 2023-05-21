@@ -16,12 +16,49 @@ void clearFile(string fileName){ //Função para limpar um arquivo
     fout.close();
 }
 
-void hashTableToFile(){
-    for(int cont = 0; cont < BUCKETS_QTD; cont++){
-        
+void generateBucketStructure(){ //Colocar a estrutura de buckets no arquivo
+    char *voidData = new char[BLOCK_SIZE]{0}; 
+
+    fstream fout; //Stream de dados para o arquivo
+
+    fout.open("dataFile.dat", ios::out | ios::binary); //Abrindo arquivo para escrita
+
+    if(fout){
+        for(int cont = 0; cont < TOTAL_BLOCKS; cont++){
+            fout.write(voidData, BLOCK_SIZE);
+        }
+        delete[] voidData;
+        fout.close(); //Fechando arquivo
+    }
+    else{
+        cout << "Não foi possivel abrir o arquivo binário para escrita..." << endl;
     }
 }
 
+void saveRegister(DataRegister data){ //Função para salvar os registros em memória secundaria
+    fstream fout; //Stream de dados para o arquivo
+    int bucketIndex = hashFunction(data.ID, BUCKETS_QTD);
+    int currentBlockPos;
+    unsigned char *tempBlock = new unsigned char[BLOCK_SIZE];
+
+    fout.open("dataFile.dat", ios::in | ios::binary | ios::app); //Abrindo arquivo para escrita
+
+    if(fout){
+        for(int cont = 0; cont < BLOCKS_PER_BUCKET; cont++){
+            currentBlockPos = bucketIndex * BLOCKS_PER_BUCKET + cont;
+            fout.seekg(BLOCK_SIZE * currentBlockPos, ios::beg);
+            fout.read((char *)tempBlock, BLOCK_SIZE);   
+        }
+
+        fout.close(); //Fechando arquivo
+    }
+    else{
+        cout << "Não foi possivel abrir o arquivo binário para escrita..." << endl;
+    }
+}
+
+/*
+//Sequencial
 void saveRegister(DataRegister data){ //Função para salvar os registros em memória secundaria
     fstream fout; //Stream de dados para o arquivo
 
@@ -35,6 +72,7 @@ void saveRegister(DataRegister data){ //Função para salvar os registros em mem
         cout << "Não foi possivel abrir o arquivo binário para escrita..." << endl;
     }
 }
+*/
 
 void processCSV(char *file){ //Função para ler os registros do csv
     ifstream inputFile; //Stream de dados para o arquivo
@@ -44,8 +82,7 @@ void processCSV(char *file){ //Função para ler os registros do csv
         string tempString; //String para receber temporariamente o conteudo de uma linha e modificá-la
         string line = "";  //String para armazenar a linha atual
         clearFile("dataFile.dat"); //Limpar arquivo de dados caso já exista
-        //hashTableToFile(); //Gerar os buckets no arquivo
-
+        generateBucketStructure();
 
         while(getline(inputFile, line)){
             //A estratégia usada foi pegar uma linha, armazenar em uma stringstream, manipular a linha e colocar no campo correspondente do registro
